@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         html, body, #root {
             height: 100%;
@@ -25,38 +24,23 @@
             flex-direction: column;
             overflow: hidden;
         }
-        .perspective-1000 {
-            perspective: 1000px;
-        }
-        .transform-style-3d {
-            transform-style: preserve-3d;
-        }
-        .backface-hidden {
-            backface-visibility: hidden;
-        }
-        .rotate-y-180 {
-            transform: rotateY(180deg);
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 2px;
-        }
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
-    <script type="text/babel">
+    <script>
+        // 不再依賴 Babel，直接使用原生 React 方法，徹底解決網頁白屏與更新錯誤問題
+        const e = React.createElement;
         const { useState, useEffect, useMemo } = React;
 
-        // 核心 34 題精準數據庫
         const finalDatabase = [
             { id: 1, question: "CT 檢查基本流程的五大核心步驟？", answer: "1.確認醫囑 2.病人確認 3.檢查前準備 4.掃描執行 5.檢查後處理。", topic: "檢查流程" },
             { id: 2, question: "在「確認醫囑（Order）」階段需核對哪三項？", answer: "檢查部位、是否使用對比劑、特殊需求（如急診/ICU/危急病人）。", topic: "檢查流程" },
@@ -85,7 +69,7 @@
             { id: 25, question: "縮寫必背：CTDI 與 DLP 的用途？", answer: "與輻射劑量監測相關的參數。", topic: "常用縮寫" },
             { id: 26, question: "縮寫必背：eGFR 的中文名稱？", answer: "腎絲球過濾率。", topic: "常用縮寫" },
             { id: 27, question: "檢查項目縮寫：NCLD 代表什麼？", answer: "Non Contrast Low Dose 無對比劑低劑量", topic: "常用縮寫" },
-            { id: 28, question: "檢查項目縮寫：NCSD 代表什麼？", answer: "Non-Contrast Standard Dose 無對比劑標準劑量", topic: "常用縮寫" },
+            { id: 28, text: "NCSD", question: "檢查項目縮寫：NCSD 代表什麼？", answer: "Non-Contrast Standard Dose 無對比劑標準劑量", topic: "常用縮寫" },
             { id: 29, question: "臨床項目縮寫：TCC 代表什麼？", answer: "移行上皮細胞癌。", topic: "常用縮寫" },
             { id: 30, question: "臨床項目縮寫：HCC 代表什麼？", answer: "肝細胞癌。", topic: "常用縮寫" },
             { id: 31, question: "臨床項目縮寫：RCC 代表什麼？", answer: "腎細胞癌。", topic: "常用縮寫" },
@@ -94,57 +78,44 @@
             { id: 34, question: "臨床項目縮寫：DVT 代表什麼？", answer: "深部靜脈栓塞。", topic: "常用縮寫" }
         ];
 
-        // 純 SVG 圖標元件
+        // 原生無編譯 SVG 渲染器
+        const createSvg = (pathD, strokeW = "2.5") => e("svg", { className: "w-5 h-5", fill: "none", stroke: "currentColor", strokeWidth: strokeW, viewBox: "0 0 24 24" }, 
+            e("path", { strokeLinecap: "round", strokeLinejoin: "round", d: pathD })
+        );
+
         const Icons = {
-            BookOpen: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>,
-            CheckSquare: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-            TrendingUp: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>,
-            ShieldCheck: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
-            ChevronLeft: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>,
-            ChevronRight: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>,
-            Zap: () => <svg className="w-4 h-4 fill-amber-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>,
-            CheckCircle: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>,
-            AlertCircle: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            BookOpen: () => createSvg("M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"),
+            CheckSquare: () => createSvg("M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"),
+            TrendingUp: () => createSvg("M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"),
+            ShieldCheck: () => createSvg("M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", "2"),
+            ChevronLeft: () => createSvg("M15 19l-7-7 7-7", "3"),
+            ChevronRight: () => createSvg("M9 5l7 7-7 7", "3"),
+            Zap: () => e("svg", { className: "w-4 h-4 fill-amber-400", fill: "none", stroke: "currentColor", strokeWidth: "2", viewBox: "0 0 24 24" }, e("path", { d: "M13 10V3L4 14h7v7l9-11h-7z" })),
+            CheckCircle: () => createSvg("M5 13l4 4L19 7"),
+            AlertCircle: () => createSvg("M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3")
         };
 
         function App() {
             const [activeTab, setActiveTab] = useState('cards');
-            
             const [cards, setCards] = useState(() => {
-                const saved = localStorage.getItem('ct_final_cards_v5');
+                const saved = localStorage.getItem('ct_final_cards_v6');
                 return saved ? JSON.parse(saved) : finalDatabase.map(c => ({ ...c, status: 'unlearned' }));
             });
-
             const [quizHistory, setQuizHistory] = useState(() => {
-                const saved = localStorage.getItem('ct_final_history_v5');
+                const saved = localStorage.getItem('ct_final_history_v6');
                 return saved ? JSON.parse(saved) : [];
             });
 
-            useEffect(() => {
-                localStorage.setItem('ct_final_cards_v5', JSON.stringify(cards));
-            }, [cards]);
+            useEffect(() => { localStorage.setItem('ct_final_cards_v6', JSON.stringify(cards)); }, [cards]);
+            useEffect(() => { localStorage.setItem('ct_final_history_v6', JSON.stringify(quizHistory)); }, [quizHistory]);
 
-            useEffect(() => {
-                localStorage.setItem('ct_final_history_v5', JSON.stringify(quizHistory));
-            }, [quizHistory]);
-
-            const topics = useMemo(() => {
-                return ['全部', ...new Set(cards.map(c => c.topic))];
-            }, [cards]);
-
+            const topics = useMemo(() => ['全部', ...new Set(cards.map(c => c.topic))], [cards]);
             const [selectedTopic, setSelectedTopic] = useState('全部');
             const [currentCardIndex, setCurrentCardIndex] = useState(0);
             const [isFlipped, setIsFlipped] = useState(false);
 
-            const filteredCards = useMemo(() => {
-                if (selectedTopic === '全部') return cards;
-                return cards.filter(c => c.topic === selectedTopic);
-            }, [cards, selectedTopic]);
-
-            useEffect(() => {
-                setCurrentCardIndex(0);
-                setIsFlipped(false);
-            }, [selectedTopic]);
+            const filteredCards = useMemo(() => selectedTopic === '全部' ? cards : cards.filter(c => c.topic === selectedTopic), [cards, selectedTopic]);
+            useEffect(() => { setCurrentCardIndex(0); setIsFlipped(false); }, [selectedTopic]);
 
             const changeCardStatus = (id, newStatus) => {
                 setCards(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
@@ -161,53 +132,34 @@
 
             const startQuiz = () => {
                 const pool = quizTopic === '全部' ? cards : cards.filter(c => c.topic === quizTopic);
-                if (pool.length < 4) {
-                    alert('該單元題目過少，無法建立四選一試卷！');
-                    return;
-                }
-
+                if (pool.length < 4) { alert('該單元題目過少，無法建立四選一試卷！'); return; }
                 const shuffled = [...pool].sort(() => 0.5 - Math.random());
                 const selected = shuffled.slice(0, Math.min(5, shuffled.length));
-
                 const generated = selected.map(q => {
                     const distractorsPool = cards.filter(c => c.id !== q.id).map(c => c.answer);
                     const randomDistractors = [...new Set(distractorsPool)].sort(() => 0.5 - Math.random()).slice(0, 3);
                     const options = [...randomDistractors, q.answer].sort(() => 0.5 - Math.random());
                     return { ...q, options, correctAnswer: q.answer };
                 });
-
-                setQuizQuestions(generated);
-                setCurrentQuizIndex(0);
-                setSelectedAnswer(null);
-                setIsAnswerSubmitted(false);
-                setQuizScore(0);
-                setQuizSummary(null);
-                setQuizStarted(true);
+                setQuizQuestions(generated); setCurrentQuizIndex(0); setSelectedAnswer(null); setIsAnswerSubmitted(false); setQuizScore(0); setQuizSummary(null); setQuizStarted(true);
             };
 
             const submitQuizAnswer = () => {
                 if (!selectedAnswer) return;
-                const isCorrect = selectedAnswer === quizQuestions[currentQuizIndex].correctAnswer;
-                if (isCorrect) setQuizScore(p => p + 1);
+                if (selectedAnswer === quizQuestions[currentQuizIndex].correctAnswer) setQuizScore(p => p + 1);
                 setIsAnswerSubmitted(true);
             };
 
             const advanceQuiz = () => {
                 if (currentQuizIndex + 1 < quizQuestions.length) {
-                    setCurrentQuizIndex(p => p + 1);
-                    setSelectedAnswer(null);
-                    setIsAnswerSubmitted(false);
+                    setCurrentQuizIndex(p => p + 1); setSelectedAnswer(null); setIsAnswerSubmitted(false);
                 } else {
                     const finalScore = selectedAnswer === quizQuestions[currentQuizIndex].correctAnswer ? quizScore + 1 : quizScore;
                     const summary = {
                         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                        topic: quizTopic,
-                        total: quizQuestions.length,
-                        score: finalScore
+                        topic: quizTopic, total: quizQuestions.length, score: finalScore
                     };
-                    setQuizSummary(summary);
-                    setQuizHistory(prev => [summary, ...prev].slice(0, 10));
-                    setQuizStarted(false);
+                    setQuizSummary(summary); setQuizHistory(prev => [summary, ...prev].slice(0, 10)); setQuizStarted(false);
                 }
             };
 
@@ -216,103 +168,133 @@
                 const master = cards.filter(c => c.status === 'master').length;
                 const review = cards.filter(c => c.status === 'review').length;
                 const unlearned = cards.filter(c => c.status === 'unlearned').length;
-
                 const topicBreakdown = topics.filter(t => t !== '全部').map(t => {
                     const match = cards.filter(c => c.topic === t);
-                    return {
-                        name: t,
-                        total: match.length,
-                        master: match.filter(c => c.status === 'master').length,
-                        review: match.filter(c => c.status === 'review').length
-                    };
+                    return { name: t, total: match.length, master: match.filter(c => c.status === 'master').length, review: match.filter(c => c.status === 'review').length };
                 });
-
                 return { total, master, review, unlearned, topicBreakdown };
             }, [cards, topics]);
 
-            return (
-                <div className="app-container max-w-md mx-auto bg-white border-x border-slate-200 shadow-2xl relative">
-                    <header className="bg-slate-900 text-slate-50 px-4 py-4 flex justify-between items-center shrink-0 shadow-md">
-                        <div className="flex items-center space-x-2">
-                            <Icons.ShieldCheck />
-                            <h1 className="text-base font-black tracking-wide">CT學習卡與測驗</h1>
-                        </div>
-                        <span className="text-[10px] bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 px-2.5 py-0.5 rounded-full font-mono font-bold">V2.0</span>
-                    </header>
+            // 頂部導航
+            const headerElement = e("header", { className: "bg-slate-900 text-slate-50 px-4 py-4 flex justify-between items-center shrink-0 shadow-md" },
+                e("div", { className: "flex items-center space-x-2" }, e(Icons.ShieldCheck), e("h1", { className: "text-base font-black tracking-wide" }, "CT學習卡與測驗")),
+                e("span", { className: "text-[10px] bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 px-2.5 py-0.5 rounded-full font-mono font-bold" }, "PRO")
+            );
 
-                    <main className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-50">
-                        {activeTab === 'cards' && (
-                            <div className="flex flex-col h-full space-y-3.5">
-                                <div className="flex space-x-1.5 overflow-x-auto pb-1 custom-scrollbar shrink-0">
-                                    {topics.map(t => (
-                                        <button
-                                            key={t}
-                                            onClick={() => setSelectedTopic(t)}
-                                            className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${selectedTopic === t ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}
-                                        >
-                                            {t}
-                                        </button>
-                                    ))}
-                                </div>
+            // 底部導航
+            const navElement = e("nav", { className: "bg-white border-t border-slate-200 px-2 py-2 flex justify-around shrink-0 shadow-lg" },
+                e("button", { onClick: () => setActiveTab('cards'), className: `flex flex-col items-center space-y-0.5 py-1 px-4 rounded-xl ${activeTab === 'cards' ? 'text-indigo-600 font-bold' : 'text-slate-400'}` }, e(Icons.BookOpen), e("span", { className: "text-[10px]" }, "記憶卡片")),
+                e("button", { onClick: () => { setActiveTab('quiz'); setQuizStarted(false); }, className: `flex flex-col items-center space-y-0.5 py-1 px-4 rounded-xl ${activeTab === 'quiz' ? 'text-indigo-600 font-bold' : 'text-slate-400'}` }, e(Icons.CheckSquare), e("span", { className: "text-[10px]" }, "隨機模考")),
+                e("button", { onClick: () => setActiveTab('dashboard'), className: `flex flex-col items-center space-y-0.5 py-1 px-4 rounded-xl ${activeTab === 'dashboard' ? 'text-indigo-600 font-bold' : 'text-slate-400'}` }, e(Icons.TrendingUp), e("span", { className: "text-[10px]" }, "統計看板"))
+            );
 
-                                {filteredCards.length > 0 ? (
-                                    <div className="flex-1 flex flex-col justify-between py-1">
-                                        <div onClick={() => setIsFlipped(!isFlipped)} className="w-full h-72 perspective-1000 cursor-pointer touch-manipulation">
-                                            <div className={`w-full h-full duration-500 transform-style-3d relative ${isFlipped ? 'rotate-y-180' : ''}`}>
-                                                <div className="absolute inset-0 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between backface-hidden">
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded">{filteredCards[currentCardIndex].topic}</span>
-                                                        <span className="text-xs font-mono font-bold text-slate-400">{currentCardIndex + 1} / {filteredCards.length}</span>
-                                                    </div>
-                                                    <div className="text-center text-slate-800 text-base sm:text-lg font-bold px-1 py-4 leading-relaxed">{filteredCards[currentCardIndex].question}</div>
-                                                    <div className="text-center text-[10px] text-slate-400">💡 點擊卡片翻看正確答案</div>
-                                                </div>
-                                                <div className="absolute inset-0 bg-slate-900 text-slate-50 rounded-2xl p-6 flex flex-col justify-between backface-hidden rotate-y-180">
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="bg-indigo-600 text-indigo-100 text-[10px] font-bold px-2.5 py-0.5 rounded">正確解答</span>
-                                                        <span className="text-xs font-mono font-bold text-slate-500">{currentCardIndex + 1} / {filteredCards.length}</span>
-                                                    </div>
-                                                    <div className="text-left text-slate-100 text-sm sm:text-base font-semibold overflow-y-auto max-h-40 custom-scrollbar pr-1 leading-relaxed">{filteredCards[currentCardIndex].answer}</div>
-                                                    <div className="text-center text-[10px] text-slate-500">🔄 點擊卡片看回題目</div>
-                                                </div>
-                                            </div>
-                                        </div>
+            // 主內容分發
+            let mainContent;
+            if (activeTab === 'cards') {
+                mainContent = e("div", { className: "flex flex-col h-full space-y-3.5" },
+                    e("div", { className: "flex space-x-1.5 overflow-x-auto pb-1 custom-scrollbar shrink-0" },
+                        topics.map(t => e("button", { key: t, onClick: () => setSelectedTopic(t), className: `px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${selectedTopic === t ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}` }, t))
+                    ),
+                    filteredCards.length > 0 ? e("div", { className: "flex-1 flex flex-col justify-between py-1" },
+                        e("div", { onClick: () => setIsFlipped(!isFlipped), className: "w-full h-72 perspective-1000 cursor-pointer touch-manipulation" },
+                            e("div", { className: `w-full h-full duration-500 transform-style-3d relative ${isFlipped ? 'rotate-y-180' : ''}` },
+                                e("div", { className: "absolute inset-0 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between backface-hidden" },
+                                    e("div", { className: "flex justify-between items-center" }, e("span", { className: "bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded" }, filteredCards[currentCardIndex].topic), e("span", { className: "text-xs font-mono font-bold text-slate-400" }, `${currentCardIndex + 1} / ${filteredCards.length}`)),
+                                    e("div", { className: "text-center text-slate-800 text-base sm:text-lg font-bold px-1 py-4 leading-relaxed" }, filteredCards[currentCardIndex].question),
+                                    e("div", { className: "text-center text-[10px] text-slate-400" }, "💡 點擊卡片翻看正確答案")
+                                ),
+                                e("div", { className: "absolute inset-0 bg-slate-900 text-slate-50 rounded-2xl p-6 flex flex-col justify-between backface-hidden rotate-y-180" },
+                                    e("div", { className: "flex justify-between items-center" }, e("span", { className: "bg-indigo-600 text-indigo-100 text-[10px] font-bold px-2.5 py-0.5 rounded" }, "正確解答"), e("span", { className: "text-xs font-mono font-bold text-slate-500" }, `${currentCardIndex + 1} / ${filteredCards.length}`)),
+                                    e("div", { className: "text-left text-slate-100 text-sm sm:text-base font-semibold overflow-y-auto max-h-40 custom-scrollbar pr-1 leading-relaxed" }, filteredCards[currentCardIndex].answer),
+                                    e("div", { className: "text-center text-[10px] text-slate-500" }, "🔄 點擊卡片看回題目")
+                                )
+                            )
+                        ),
+                        e("div", { className: "grid grid-cols-2 gap-3 my-2" },
+                            e("button", { onClick: (ev) => { ev.stopPropagation(); changeCardStatus(filteredCards[currentCardIndex].id, 'review'); }, className: `py-3 rounded-xl border text-xs font-bold flex items-center justify-center space-x-1.5 ${filteredCards[currentCardIndex].status === 'review' ? 'bg-amber-50 border-amber-400 text-amber-700 font-black' : 'bg-white border-slate-200 text-slate-600'}` }, e(Icons.AlertCircle), e("span", {}, "標記再複習")),
+                            e("button", { onClick: (ev) => { ev.stopPropagation(); changeCardStatus(filteredCards[currentCardIndex].id, 'master'); }, className: `py-3 rounded-xl border text-xs font-bold flex items-center justify-center space-x-1.5 ${filteredCards[currentCardIndex].status === 'master' ? 'bg-emerald-50 border-emerald-400 text-emerald-700 font-black' : 'bg-white border-slate-200 text-slate-600'}` }, e(Icons.CheckCircle), e("span", {}, "這題我會了"))
+                        ),
+                        e("div", { className: "flex items-center justify-between px-1" },
+                            e("button", { disabled: currentCardIndex === 0, onClick: () => { setCurrentCardIndex(p => p - 1); setIsFlipped(false); }, className: "p-3 bg-white border border-slate-200 rounded-full text-slate-600 disabled:opacity-40 disabled:pointer-events-none active:bg-slate-100 shadow-sm" }, e(Icons.ChevronLeft)),
+                            e("div", { className: "text-xs font-bold text-slate-400 font-mono tracking-wide" }, `頁數 ${currentCardIndex + 1} / ${filteredCards.length}`),
+                            e("button", { disabled: currentCardIndex === filteredCards.length - 1, onClick: () => { setCurrentCardIndex(p => p + 1); setIsFlipped(false); }, className: "p-3 bg-white border border-slate-200 rounded-full text-slate-600 disabled:opacity-40 disabled:pointer-events-none active:bg-slate-100 shadow-sm" }, e(Icons.ChevronRight))
+                        )
+                    ) : e("div", { className: "flex-1 flex flex-col items-center justify-center text-slate-400 py-12" }, e("p", { className: "text-xs" }, "目前暫無任何考題"))
+                );
+            } else if (activeTab === 'quiz') {
+                mainContent = e("div", { className: "flex flex-col h-full justify-between" },
+                    !quizStarted ? e("div", { className: "bg-white rounded-2xl border border-slate-200 p-5 shadow-sm my-auto space-y-5" },
+                        e("div", { className: "text-center space-y-2" }, e("div", { className: "inline-flex p-3 bg-indigo-50 text-indigo-600 rounded-2xl shadow-inner" }, e(Icons.CheckSquare)), e("h3", { className: "text-base font-extrabold text-slate-800" }, "隨機實戰強效模考"), e("p", { className: "text-xs text-slate-500 px-1 leading-relaxed" }, "隨機抽取 5 題，並將其餘考題答案打散混淆成四選一選項，實現完美的實戰盲測！")),
+                        quizSummary ? e("div", { className: "bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center" }, e("span", { className: "text-[10px] text-emerald-700 font-bold tracking-wider block mb-0.5" }, "最新完成戰績"), e("div", { className: "text-lg font-black text-emerald-800 font-mono" }, `${quizSummary.score} / ${quizSummary.total} 題`), e("span", { className: "text-[9px] text-slate-400 block" }, `${quizSummary.date} | ${quizSummary.topic}`)) : null,
+                        e("div", { className: "space-y-1" }, e("label", { className: "text-xs font-bold text-slate-600 pl-0.5 block" }, "篩選測驗單元"), e("select", { value: quizTopic, onChange: (ev) => setQuizTopic(ev.target.value), className: "w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-3 py-3 text-xs font-bold outline-none" }, topics.map(t => e("option", { key: t, value: t }, t)))),
+                        e("button", { onClick: startQuiz, className: "w-full bg-slate-900 text-white font-bold text-xs py-3.5 rounded-xl shadow-md tracking-wider flex items-center justify-center space-x-1.5" }, e(Icons.Zap), e("span", {}, "開始進行模考"))
+                    ) : e("div", { className: "flex flex-col h-full justify-between py-1" },
+                        e("div", { className: "w-full shrink-0" },
+                            e("div", { className: "flex justify-between items-center text-xs text-slate-500 font-bold mb-1.5 px-0.5" }, e("span", { className: "bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-[10px]" }, quizQuestions[currentQuizIndex].topic), e("span", { className: "font-mono" }, `${currentQuizIndex + 1} / ${quizQuestions.length} 題`)),
+                            e("div", { className: "w-full h-1.5 bg-slate-200 rounded-full overflow-hidden" }, e("div", { className: "h-full bg-indigo-600 transition-all duration-300", style: { width: `${((currentQuizIndex + 1) / quizQuestions.length) * 100}%` } }))
+                        ),
+                        e("div", { className: "bg-white rounded-2xl border border-slate-200 p-5 shadow-sm my-4 flex-1 flex flex-col justify-center" }, e("p", { className: "text-slate-800 text-sm sm:text-base font-bold text-center leading-relaxed" }, quizQuestions[currentQuizIndex].question)),
+                        e("div", { className: "space-y-2 shrink-0 mb-4" }, quizQuestions[currentQuizIndex].options.map((option, idx) => {
+                            const isCorrect = option === quizQuestions[currentQuizIndex].correctAnswer;
+                            const isSelected = option === selectedAnswer;
+                            let optStyle = "bg-white border-slate-200 text-slate-700";
+                            if (isAnswerSubmitted) {
+                                if (isCorrect) optStyle = "bg-emerald-50 border-emerald-500 text-emerald-800 font-bold shadow-sm";
+                                else if (isSelected) optStyle = "bg-rose-50 border-rose-400 text-rose-800";
+                                else optStyle = "bg-white border-slate-100 opacity-40";
+                            } else if (isSelected) { optStyle = "bg-indigo-50 border-indigo-500 text-indigo-700 font-bold"; }
+                            return e("button", { key: idx, disabled: isAnswerSubmitted, onClick: () => setSelectedAnswer(option), className: `w-full text-left p-3 rounded-xl border text-xs sm:text-sm transition-all flex items-start space-x-2 ${optStyle}` },
+                                e("span", { className: "font-mono bg-slate-100 text-slate-500 rounded-md w-4 h-4 flex items-center justify-center shrink-0 mt-0.5 text-[10px]" }, String.fromCharCode(65 + idx)),
+                                e("span", { className: "leading-normal flex-1" }, option)
+                            );
+                        })),
+                        e("div", { className: "shrink-0" }, !isAnswerSubmitted ? e("button", { disabled: !selectedAnswer, onClick: submitQuizAnswer, className: "w-full bg-indigo-600 disabled:opacity-40 text-white font-bold text-xs py-3.5 rounded-xl shadow-md" }, "確認送出答案") : e("button", { onClick: advanceQuiz, className: "w-full bg-slate-800 text-white font-bold text-xs py-3.5 rounded-xl shadow-md flex items-center justify-center space-x-1" }, e("span", {}, currentQuizIndex + 1 === quizQuestions.length ? '查看總分結算' : '下一題'), e(Icons.ChevronRight)))
+                    )
+                );
+            } else if (activeTab === 'dashboard') {
+                mainContent = e("div", { className: "space-y-4" },
+                    e("div", { className: "bg-white rounded-2xl border border-slate-200 p-4 shadow-sm grid grid-cols-3 gap-2 text-center" },
+                        e("div", { className: "bg-emerald-50/50 border border-emerald-100 rounded-xl p-2.5" }, e("span", { className: "text-[10px] text-emerald-600 font-bold block mb-0.5" }, "熟練掌握"), e("span", { className: "text-xl font-black text-emerald-600 font-mono" }, stats.master), e("span", { className: "text-[9px] text-slate-400 block" }, `/ {stats.total} 題`)),
+                        e("div", { className: "bg-amber-50/50 border border-amber-100 rounded-xl p-2.5" }, e("span", { className: "text-[10px] text-amber-600 font-bold block mb-0.5" }, "待複習區"), e("span", { className: "text-xl font-black text-amber-500 font-mono" }, stats.review), e("span", { className: "text-[9px] text-slate-400 block" }, `/ {stats.total} 題`)),
+                        e("div", { className: "bg-slate-100/70 border border-slate-200 rounded-xl p-2.5" }, e("span", { className: "text-[10px] text-slate-500 font-bold block mb-0.5" }, "全新未讀"), e("span", { className: "text-xl font-black text-slate-400 font-mono" }, stats.unlearned), e("span", { className: "text-[9px] text-slate-400 block" }, `/ {stats.total} 題`))
+                    ),
+                    e("div", { className: "bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3" },
+                        e("h4", { className: "text-xs font-bold text-slate-700 border-b pb-2 flex items-center space-x-1.5" }, e(Icons.TrendingUp), e("span", {}, "各單元國考掌握度佔比")),
+                        e("div", { className: "space-y-3" }, stats.topicBreakdown.map(topic => {
+                            const masterPct = topic.total > 0 ? (topic.master / topic.total) * 100 : 0;
+                            const reviewPct = topic.total > 0 ? (topic.review / topic.total) * 100 : 0;
+                            return e("div", { key: topic.name, className: "space-y-1" },
+                                e("div", { className: "flex justify-between text-xs font-bold text-slate-600" }, e("span", { className: "truncate max-w-[200px]" }, topic.name), e("span", { className: "font-mono text-[10px] text-slate-400 shrink-0" }, `掌握率 ${topic.master}/${topic.total}`)),
+                                e("div", { className: "w-full h-2 bg-slate-100 rounded-full flex overflow-hidden" }, e("div", { className: "bg-emerald-500 h-full", style: { width: `${masterPct}%` } }), e("div", { className: "bg-amber-400 h-full", style: { width: `${reviewPct}%` } }))
+                            );
+                        }))
+                    ),
+                    e("div", { className: "bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-2" },
+                        e("h4", { className: "text-xs font-bold text-slate-700 flex items-center space-x-1 mb-1.5" }, e("span", {}, "📋 歷史實戰測驗紀錄")),
+                        quizHistory.length > 0 ? e("div", { className: "space-y-2 max-h-36 overflow-y-auto custom-scrollbar pr-0.5" }, quizHistory.map((hist, i) => e("div", { key: i, className: "flex justify-between items-center bg-slate-50 border border-slate-100 p-2 rounded-xl" },
+                            e("div", { className: "truncate pr-2" }, e("span", { className: "text-xs font-bold text-slate-700 block truncate" }, `${hist.topic} 模考`), e("span", { className: "text-[9px] text-slate-400" }, hist.date)),
+                            e("span", { className: `text-xs font-mono font-black px-2.5 py-1 rounded-md shrink-0 ${hist.score === hist.total ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-50 text-indigo-700'}` }, `${hist.score} / ${hist.total} 題`)
+                        ))) : e("p", { className: "text-center text-xs text-slate-400 py-4" }, "目前尚無模考歷史紀錄")
+                    )
+                );
+            }
 
-                                        <div className="grid grid-cols-2 gap-3 my-2">
-                                            <button onClick={(e) => { e.stopPropagation(); changeCardStatus(filteredCards[currentCardIndex].id, 'review'); }} className={`py-3 rounded-xl border text-xs font-bold flex items-center justify-center space-x-1.5 ${filteredCards[currentCardIndex].status === 'review' ? 'bg-amber-50 border-amber-400 text-amber-700 font-black' : 'bg-white border-slate-200 text-slate-600'}`}>
-                                                <Icons.AlertCircle /><span>標記再複習</span>
-                                            </button>
-                                            <button onClick={(e) => { e.stopPropagation(); changeCardStatus(filteredCards[currentCardIndex].id, 'master'); }} className={`py-3 rounded-xl border text-xs font-bold flex items-center justify-center space-x-1.5 ${filteredCards[currentCardIndex].status === 'master' ? 'bg-emerald-50 border-emerald-400 text-emerald-700 font-black' : 'bg-white border-slate-200 text-slate-600'}`}>
-                                                <Icons.CheckCircle /><span>這題我會了</span>
-                                            </button>
-                                        </div>
+            return e("div", { className: "app-container max-w-md mx-auto bg-white border-x border-slate-200 shadow-2xl relative" },
+                headerElement,
+                e("main", { className: "flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-50" }, mainContent),
+                navElement
+            );
+        }
 
-                                        <div className="flex items-center justify-between px-1">
-                                            <button disabled={currentCardIndex === 0} onClick={() => { setCurrentCardIndex(p => p - 1); setIsFlipped(false); }} className="p-3 bg-white border border-slate-200 rounded-full text-slate-600 disabled:opacity-40 disabled:pointer-events-none active:bg-slate-100 shadow-sm"><Icons.ChevronLeft /></button>
-                                            <div className="text-xs font-bold text-slate-400 font-mono tracking-wide">頁數 {currentCardIndex + 1} / {filteredCards.length}</div>
-                                            <button disabled={currentCardIndex === filteredCards.length - 1} onClick={() => { setCurrentCardIndex(p => p + 1); setIsFlipped(false); }} className="p-3 bg-white border border-slate-200 rounded-full text-slate-600 disabled:opacity-40 disabled:pointer-events-none active:bg-slate-100 shadow-sm"><Icons.ChevronRight /></button>
-                                        </div>
-                                    </div>
-                                ) : <div className="flex-1 flex flex-col items-center justify-center text-slate-400 py-12"><p className="text-xs">目前暫無任何考題</p></div>}
-                            </div>
-                        )}
-
-                        {activeTab === 'quiz' && (
-                            <div className="flex flex-col h-full justify-between">
-                                {!quizStarted ? (
-                                    <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm my-auto space-y-5">
-                                        <div className="text-center space-y-2">
-                                            <div className="inline-flex p-3 bg-indigo-50 text-indigo-600 rounded-2xl shadow-inner"><Icons.CheckSquare /></div>
-                                            <h3 className="text-base font-extrabold text-slate-800">隨機實戰強效模考</h3>
-                                            <p className="text-xs text-slate-500 px-1 leading-relaxed">隨機抽取 5 題，並將其餘考題答案打散混淆成四選一選項，實現完美的實戰盲測！</p>
-                                        </div>
-                                        {quizSummary && (
-                                            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center">
-                                                <span className="text-[10px] text-emerald-700 font-bold tracking-wider block mb-0.5">最新完成戰績</span>
-                                                <div className="text-lg font-black text-emerald-800 font-mono">{quizSummary.score} / {quizSummary.total} 題</div>
-                                                <span className="text-[9px] text-slate-400 block">{quizSummary.date} | {quizSummary.topic}</span>
-                                            </div>
-                                        )}
-                                        <div className="space-y-1">
-                                            <label className="text-xs font-bold text-slate-600 pl-0.5 block">篩選測驗單元</label>
-                                            <select value={quizTopic} onChange={(e) => setQuizTopic(e.target.value)} className="w
+        // 最純粹穩定的渲染錨點，避開各家平台的解析引擎 BUG
+        const rootContainer = document.getElementById('root');
+        if (rootContainer) {
+            if (typeof ReactDOM.createRoot === 'function') {
+                ReactDOM.createRoot(rootContainer).render(e(App));
+            } else {
+                ReactDOM.render(e(App), rootContainer);
+            }
+        }
+    </script>
+</body>
+</html>
