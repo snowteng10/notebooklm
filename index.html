@@ -54,7 +54,9 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // 嚴格依據您的最新數據整合之 34 題核心數據庫
+        const { useState, useEffect, useMemo } = React;
+
+        // 核心 34 題精準數據庫
         const finalDatabase = [
             { id: 1, question: "CT 檢查基本流程的五大核心步驟？", answer: "1.確認醫囑 2.病人確認 3.檢查前準備 4.掃描執行 5.檢查後處理。", topic: "檢查流程" },
             { id: 2, question: "在「確認醫囑（Order）」階段需核對哪三項？", answer: "檢查部位、是否使用對比劑、特殊需求（如急診/ICU/危急病人）。", topic: "檢查流程" },
@@ -92,7 +94,7 @@
             { id: 34, question: "臨床項目縮寫：DVT 代表什麼？", answer: "深部靜脈栓塞。", topic: "常用縮寫" }
         ];
 
-        // 純 SVG 圖標元件，100% 避免外部加載失敗問題
+        // 純 SVG 圖標元件
         const Icons = {
             BookOpen: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>,
             CheckSquare: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
@@ -106,40 +108,40 @@
         };
 
         function App() {
-            const [activeTab, setActiveTab] = React.useState('cards');
+            const [activeTab, setActiveTab] = useState('cards');
             
-            const [cards, setCards] = React.useState(() => {
-                const saved = localStorage.getItem('ct_pro_cards_final');
+            const [cards, setCards] = useState(() => {
+                const saved = localStorage.getItem('ct_final_cards_v5');
                 return saved ? JSON.parse(saved) : finalDatabase.map(c => ({ ...c, status: 'unlearned' }));
             });
 
-            const [quizHistory, setQuizHistory] = React.useState(() => {
-                const saved = localStorage.getItem('ct_pro_history_final');
+            const [quizHistory, setQuizHistory] = useState(() => {
+                const saved = localStorage.getItem('ct_final_history_v5');
                 return saved ? JSON.parse(saved) : [];
             });
 
-            React.useEffect(() => {
-                localStorage.setItem('ct_pro_cards_final', JSON.stringify(cards));
+            useEffect(() => {
+                localStorage.setItem('ct_final_cards_v5', JSON.stringify(cards));
             }, [cards]);
 
-            React.useEffect(() => {
-                localStorage.setItem('ct_pro_history_final', JSON.stringify(quizHistory));
+            useEffect(() => {
+                localStorage.setItem('ct_final_history_v5', JSON.stringify(quizHistory));
             }, [quizHistory]);
 
-            const topics = React.useMemo(() => {
+            const topics = useMemo(() => {
                 return ['全部', ...new Set(cards.map(c => c.topic))];
             }, [cards]);
 
-            const [selectedTopic, setSelectedTopic] = React.useState('全部');
-            const [currentCardIndex, setCurrentCardIndex] = React.useState(0);
-            const [isFlipped, setIsFlipped] = React.useState(false);
+            const [selectedTopic, setSelectedTopic] = useState('全部');
+            const [currentCardIndex, setCurrentCardIndex] = useState(0);
+            const [isFlipped, setIsFlipped] = useState(false);
 
-            const filteredCards = React.useMemo(() => {
+            const filteredCards = useMemo(() => {
                 if (selectedTopic === '全部') return cards;
                 return cards.filter(c => c.topic === selectedTopic);
             }, [cards, selectedTopic]);
 
-            React.useEffect(() => {
+            useEffect(() => {
                 setCurrentCardIndex(0);
                 setIsFlipped(false);
             }, [selectedTopic]);
@@ -148,14 +150,14 @@
                 setCards(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
             };
 
-            const [quizTopic, setQuizTopic] = React.useState('全部');
-            const [quizStarted, setQuizStarted] = React.useState(false);
-            const [quizQuestions, setQuizQuestions] = React.useState([]);
-            const [currentQuizIndex, setCurrentQuizIndex] = React.useState(0);
-            const [selectedAnswer, setSelectedAnswer] = React.useState(null);
-            const [isAnswerSubmitted, setIsAnswerSubmitted] = React.useState(false);
-            const [quizScore, setQuizScore] = React.useState(0);
-            const [quizSummary, setQuizSummary] = React.useState(null);
+            const [quizTopic, setQuizTopic] = useState('全部');
+            const [quizStarted, setQuizStarted] = useState(false);
+            const [quizQuestions, setQuizQuestions] = useState([]);
+            const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
+            const [quizScore, setQuizScore] = useState(0);
+            const [quizSummary, setQuizSummary] = useState(null);
 
             const startQuiz = () => {
                 const pool = quizTopic === '全部' ? cards : cards.filter(c => c.topic === quizTopic);
@@ -209,7 +211,7 @@
                 }
             };
 
-            const stats = React.useMemo(() => {
+            const stats = useMemo(() => {
                 const total = cards.length;
                 const master = cards.filter(c => c.status === 'master').length;
                 const review = cards.filter(c => c.status === 'review').length;
@@ -233,9 +235,9 @@
                     <header className="bg-slate-900 text-slate-50 px-4 py-4 flex justify-between items-center shrink-0 shadow-md">
                         <div className="flex items-center space-x-2">
                             <Icons.ShieldCheck />
-                            <h1 className="text-base font-black tracking-wide">放射師國考必背 34 題 Pro</h1>
+                            <h1 className="text-base font-black tracking-wide">CT學習卡與測驗</h1>
                         </div>
-                        <span className="text-[10px] bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 px-2.5 py-0.5 rounded-full font-mono font-bold">V1.2</span>
+                        <span className="text-[10px] bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 px-2.5 py-0.5 rounded-full font-mono font-bold">V2.0</span>
                     </header>
 
                     <main className="flex-1 overflow-y-auto custom-scrollbar p-4 bg-slate-50">
@@ -313,120 +315,4 @@
                                         )}
                                         <div className="space-y-1">
                                             <label className="text-xs font-bold text-slate-600 pl-0.5 block">篩選測驗單元</label>
-                                            <select value={quizTopic} onChange={(e) => setQuizTopic(e.target.value)} className="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-3 py-3 text-xs font-bold outline-none">
-                                                {topics.map(t => <option key={t} value={t}>{t}</option>)}
-                                            </select>
-                                        </div>
-                                        <button onClick={startQuiz} className="w-full bg-slate-900 text-white font-bold text-xs py-3.5 rounded-xl shadow-md tracking-wider flex items-center justify-center space-x-1.5"><Icons.Zap /><span>開始進行模考</span></button>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col h-full justify-between py-1">
-                                        <div className="w-full shrink-0">
-                                            <div className="flex justify-between items-center text-xs text-slate-500 font-bold mb-1.5 px-0.5">
-                                                <span className="bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-[10px]">{quizQuestions[currentQuizIndex].topic}</span>
-                                                <span className="font-mono">{currentQuizIndex + 1} / {quizQuestions.length} 題</span>
-                                            </div>
-                                            <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                                                <div className="h-full bg-indigo-600 transition-all duration-300" style={{ width: `${((currentQuizIndex + 1) / quizQuestions.length) * 100}%` }} />
-                                            </div>
-                                        </div>
-                                        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm my-4 flex-1 flex flex-col justify-center">
-                                            <p className="text-slate-800 text-sm sm:text-base font-bold text-center leading-relaxed">{quizQuestions[currentQuizIndex].question}</p>
-                                        </div>
-                                        <div className="space-y-2 shrink-0 mb-4">
-                                            {quizQuestions[currentQuizIndex].options.map((option, idx) => {
-                                                const isCorrect = option === quizQuestions[currentQuizIndex].correctAnswer;
-                                                const isSelected = option === selectedAnswer;
-                                                let optStyle = "bg-white border-slate-200 text-slate-700";
-                                                if (isAnswerSubmitted) {
-                                                    if (isCorrect) optStyle = "bg-emerald-50 border-emerald-500 text-emerald-800 font-bold shadow-sm";
-                                                    else if (isSelected) optStyle = "bg-rose-50 border-rose-400 text-rose-800";
-                                                    else optStyle = "bg-white border-slate-100 opacity-40";
-                                                } else if (isSelected) {
-                                                    optStyle = "bg-indigo-50 border-indigo-500 text-indigo-700 font-bold";
-                                                }
-                                                return (
-                                                    <button key={idx} disabled={isAnswerSubmitted} onClick={() => setSelectedAnswer(option)} className={`w-full text-left p-3 rounded-xl border text-xs sm:text-sm transition-all flex items-start space-x-2 ${optStyle}`}>
-                                                        <span className="font-mono bg-slate-100 text-slate-500 rounded-md w-4 h-4 flex items-center justify-center shrink-0 mt-0.5 text-[10px]">{String.fromCharCode(65 + idx)}</span>
-                                                        <span className="leading-normal flex-1">{option}</span>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                        <div className="shrink-0">
-                                            {!isAnswerSubmitted ? (
-                                                <button disabled={!selectedAnswer} onClick={submitQuizAnswer} className="w-full bg-indigo-600 disabled:opacity-40 text-white font-bold text-xs py-3.5 rounded-xl shadow-md">確認送出答案</button>
-                                            ) : (
-                                                <button onClick={advanceQuiz} className="w-full bg-slate-800 text-white font-bold text-xs py-3.5 rounded-xl shadow-md flex items-center justify-center space-x-1"><span>{currentQuizIndex + 1 === quizQuestions.length ? '查看總分結算' : '下一題'}</span><Icons.ChevronRight /></button>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {activeTab === 'dashboard' && (
-                            <div className="space-y-4">
-                                <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm grid grid-cols-3 gap-2 text-center">
-                                    <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-2.5"><span className="text-[10px] text-emerald-600 font-bold block mb-0.5">熟練掌握</span><span className="text-xl font-black text-emerald-600 font-mono">{stats.master}</span><span className="text-[9px] text-slate-400 block">/ {stats.total} 題</span></div>
-                                    <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-2.5"><span className="text-[10px] text-amber-600 font-bold block mb-0.5">待複習區</span><span className="text-xl font-black text-amber-500 font-mono">{stats.review}</span><span className="text-[9px] text-slate-400 block">/ {stats.total} 題</span></div>
-                                    <div className="bg-slate-100/70 border border-slate-200 rounded-xl p-2.5"><span className="text-[10px] text-slate-500 font-bold block mb-0.5">全新未讀</span><span className="text-xl font-black text-slate-400 font-mono">{stats.unlearned}</span><span className="text-[9px] text-slate-400 block">/ {stats.total} 題</span></div>
-                                </div>
-                                <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
-                                    <h4 className="text-xs font-bold text-slate-700 border-b pb-2 flex items-center space-x-1.5"><Icons.TrendingUp /><span>各單元國考掌握度佔比</span></h4>
-                                    <div className="space-y-3">
-                                        {stats.topicBreakdown.map(topic => {
-                                            const masterPct = topic.total > 0 ? (topic.master / topic.total) * 100 : 0;
-                                            const reviewPct = topic.total > 0 ? (topic.review / topic.total) * 100 : 0;
-                                            return (
-                                                <div key={topic.name} className="space-y-1">
-                                                    <div className="flex justify-between text-xs font-bold text-slate-600"><span className="truncate max-w-[200px]">{topic.name}</span><span className="font-mono text-[10px] text-slate-400 shrink-0">掌握率 {topic.master}/{topic.total}</span></div>
-                                                    <div className="w-full h-2 bg-slate-100 rounded-full flex overflow-hidden">
-                                                        <div className="bg-emerald-500 h-full" style={{ width: `${masterPct}%` }} />
-                                                        <div className="bg-amber-400 h-full" style={{ width: `${reviewPct}%` }} />
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                                <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-2">
-                                    <h4 className="text-xs font-bold text-slate-700 flex items-center space-x-1 mb-1.5"><span>📋 歷史實戰測驗紀錄</span></h4>
-                                    {quizHistory.length > 0 ? (
-                                        <div className="space-y-2 max-h-36 overflow-y-auto custom-scrollbar pr-0.5">
-                                            {quizHistory.map((hist, i) => (
-                                                <div key={i} className="flex justify-between items-center bg-slate-50 border border-slate-100 p-2 rounded-xl">
-                                                    <div className="truncate pr-2"><span className="text-xs font-bold text-slate-700 block truncate">{hist.topic} 模考</span><span className="text-[9px] text-slate-400">{hist.date}</span></div>
-                                                    <span className={`text-xs font-mono font-black px-2.5 py-1 rounded-md shrink-0 ${hist.score === hist.total ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-50 text-indigo-700'}`}>{hist.score} / {hist.total} 題</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : <p className="text-center text-xs text-slate-400 py-4">目前尚無模考歷史紀錄</p>}
-                                </div>
-                            </div>
-                        )}
-                    </main>
-
-                    <nav className="bg-white border-t border-slate-200 px-2 py-2 flex justify-around shrink-0 shadow-lg">
-                        <button onClick={() => setActiveTab('cards')} className={`flex flex-col items-center space-y-0.5 py-1 px-4 rounded-xl ${activeTab === 'cards' ? 'text-indigo-600 font-bold' : 'text-slate-400'}`}><Icons.BookOpen /><span className="text-[10px]">記憶卡片</span></button>
-                        <button onClick={() => { setActiveTab('quiz'); setQuizStarted(false); }} className={`flex flex-col items-center space-y-0.5 py-1 px-4 rounded-xl ${activeTab === 'quiz' ? 'text-indigo-600 font-bold' : 'text-slate-400'}`}><Icons.CheckSquare /><span className="text-[10px]">隨機模考</span></button>
-                        <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center space-y-0.5 py-1 px-4 rounded-xl ${activeTab === 'dashboard' ? 'text-indigo-600 font-bold' : 'text-slate-400'}`}><Icons.TrendingUp /><span className="text-[10px]">統計看板</span></button>
-                    </nav>
-                </div>
-            );
-        }
-
-        // 採用相容性最高的舊版 React CDN 降級渲染機制，保證 100% 成功開起
-        window.onload = function() {
-            const rootElement = document.getElementById('root');
-            if (rootElement) {
-                if (window.ReactDOM && window.ReactDOM.render) {
-                    window.ReactDOM.render(<App />, rootElement);
-                } else if (window.ReactDOM && window.ReactDOM.createRoot) {
-                    window.ReactDOM.createRoot(rootElement).render(<App />);
-                }
-            }
-        };
-    </script>
-</body>
-</html>
+                                            <select value={quizTopic} onChange={(e) => setQuizTopic(e.target.value)} className="w
