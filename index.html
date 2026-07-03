@@ -37,10 +37,10 @@
     <div id="root"></div>
 
     <script>
-        // 不再依賴 Babel，直接使用原生 React 方法，徹底解決網頁白屏與更新錯誤問題
         const e = React.createElement;
         const { useState, useEffect, useMemo } = React;
 
+        // 核心 34 題精準數據庫（已徹底修復第 28 題的欄位衝突錯誤）
         const finalDatabase = [
             { id: 1, question: "CT 檢查基本流程的五大核心步驟？", answer: "1.確認醫囑 2.病人確認 3.檢查前準備 4.掃描執行 5.檢查後處理。", topic: "檢查流程" },
             { id: 2, question: "在「確認醫囑（Order）」階段需核對哪三項？", answer: "檢查部位、是否使用對比劑、特殊需求（如急診/ICU/危急病人）。", topic: "檢查流程" },
@@ -69,7 +69,7 @@
             { id: 25, question: "縮寫必背：CTDI 與 DLP 的用途？", answer: "與輻射劑量監測相關的參數。", topic: "常用縮寫" },
             { id: 26, question: "縮寫必背：eGFR 的中文名稱？", answer: "腎絲球過濾率。", topic: "常用縮寫" },
             { id: 27, question: "檢查項目縮寫：NCLD 代表什麼？", answer: "Non Contrast Low Dose 無對比劑低劑量", topic: "常用縮寫" },
-            { id: 28, text: "NCSD", question: "檢查項目縮寫：NCSD 代表什麼？", answer: "Non-Contrast Standard Dose 無對比劑標準劑量", topic: "常用縮寫" },
+            { id: 28, question: "檢查項目縮寫：NCSD 代表什麼？", answer: "Non-Contrast Standard Dose 無對比劑標準劑量", topic: "常用縮寫" },
             { id: 29, question: "臨床項目縮寫：TCC 代表什麼？", answer: "移行上皮細胞癌。", topic: "常用縮寫" },
             { id: 30, question: "臨床項目縮寫：HCC 代表什麼？", answer: "肝細胞癌。", topic: "常用縮寫" },
             { id: 31, question: "臨床項目縮寫：RCC 代表什麼？", answer: "腎細胞癌。", topic: "常用縮寫" },
@@ -98,16 +98,16 @@
         function App() {
             const [activeTab, setActiveTab] = useState('cards');
             const [cards, setCards] = useState(() => {
-                const saved = localStorage.getItem('ct_final_cards_v6');
+                const saved = localStorage.getItem('ct_final_cards_v7');
                 return saved ? JSON.parse(saved) : finalDatabase.map(c => ({ ...c, status: 'unlearned' }));
             });
             const [quizHistory, setQuizHistory] = useState(() => {
-                const saved = localStorage.getItem('ct_final_history_v6');
+                const saved = localStorage.getItem('ct_final_history_v7');
                 return saved ? JSON.parse(saved) : [];
             });
 
-            useEffect(() => { localStorage.setItem('ct_final_cards_v6', JSON.stringify(cards)); }, [cards]);
-            useEffect(() => { localStorage.setItem('ct_final_history_v6', JSON.stringify(quizHistory)); }, [quizHistory]);
+            useEffect(() => { localStorage.setItem('ct_final_cards_v7', JSON.stringify(cards)); }, [cards]);
+            useEffect(() => { localStorage.setItem('ct_final_history_v7', JSON.stringify(quizHistory)); }, [quizHistory]);
 
             const topics = useMemo(() => ['全部', ...new Set(cards.map(c => c.topic))], [cards]);
             const [selectedTopic, setSelectedTopic] = useState('全部');
@@ -254,9 +254,9 @@
             } else if (activeTab === 'dashboard') {
                 mainContent = e("div", { className: "space-y-4" },
                     e("div", { className: "bg-white rounded-2xl border border-slate-200 p-4 shadow-sm grid grid-cols-3 gap-2 text-center" },
-                        e("div", { className: "bg-emerald-50/50 border border-emerald-100 rounded-xl p-2.5" }, e("span", { className: "text-[10px] text-emerald-600 font-bold block mb-0.5" }, "熟練掌握"), e("span", { className: "text-xl font-black text-emerald-600 font-mono" }, stats.master), e("span", { className: "text-[9px] text-slate-400 block" }, `/ {stats.total} 題`)),
-                        e("div", { className: "bg-amber-50/50 border border-amber-100 rounded-xl p-2.5" }, e("span", { className: "text-[10px] text-amber-600 font-bold block mb-0.5" }, "待複習區"), e("span", { className: "text-xl font-black text-amber-500 font-mono" }, stats.review), e("span", { className: "text-[9px] text-slate-400 block" }, `/ {stats.total} 題`)),
-                        e("div", { className: "bg-slate-100/70 border border-slate-200 rounded-xl p-2.5" }, e("span", { className: "text-[10px] text-slate-500 font-bold block mb-0.5" }, "全新未讀"), e("span", { className: "text-xl font-black text-slate-400 font-mono" }, stats.unlearned), e("span", { className: "text-[9px] text-slate-400 block" }, `/ {stats.total} 題`))
+                        e("div", { className: "bg-emerald-50/50 border border-emerald-100 rounded-xl p-2.5" }, e("span", { className: "text-[10px] text-emerald-600 font-bold block mb-0.5" }, "熟練掌握"), e("span", { className: "text-xl font-black text-emerald-600 font-mono" }, stats.master), e("span", { className: "text-[9px] text-slate-400 block" }, `/ ${stats.total}`)),
+                        e("div", { className: "bg-amber-50/50 border border-amber-100 rounded-xl p-2.5" }, e("span", { className: "text-[10px] text-amber-600 font-bold block mb-0.5" }, "待複習區"), e("span", { className: "text-xl font-black text-amber-500 font-mono" }, stats.review), e("span", { className: "text-[9px] text-slate-400 block" }, `/ ${stats.total}`)),
+                        e("div", { className: "bg-slate-100/70 border border-slate-200 rounded-xl p-2.5" }, e("span", { className: "text-[10px] text-slate-500 font-bold block mb-0.5" }, "全新未讀"), e("span", { className: "text-xl font-black text-slate-400 font-mono" }, stats.unlearned), e("span", { className: "text-[9px] text-slate-400 block" }, `/ ${stats.total}`))
                     ),
                     e("div", { className: "bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3" },
                         e("h4", { className: "text-xs font-bold text-slate-700 border-b pb-2 flex items-center space-x-1.5" }, e(Icons.TrendingUp), e("span", {}, "各單元國考掌握度佔比")),
@@ -274,7 +274,7 @@
                         quizHistory.length > 0 ? e("div", { className: "space-y-2 max-h-36 overflow-y-auto custom-scrollbar pr-0.5" }, quizHistory.map((hist, i) => e("div", { key: i, className: "flex justify-between items-center bg-slate-50 border border-slate-100 p-2 rounded-xl" },
                             e("div", { className: "truncate pr-2" }, e("span", { className: "text-xs font-bold text-slate-700 block truncate" }, `${hist.topic} 模考`), e("span", { className: "text-[9px] text-slate-400" }, hist.date)),
                             e("span", { className: `text-xs font-mono font-black px-2.5 py-1 rounded-md shrink-0 ${hist.score === hist.total ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-50 text-indigo-700'}` }, `${hist.score} / ${hist.total} 題`)
-                        ))) : e("p", { className: "text-center text-xs text-slate-400 py-4" }, "目前尚無模考歷史紀錄")
+                        ))) : e("p", { className: "text-center text-xs text-slate-400 py-4" }, "目尚無模考歷史紀錄")
                     )
                 );
             }
@@ -286,7 +286,6 @@
             );
         }
 
-        // 最純粹穩定的渲染錨點，避開各家平台的解析引擎 BUG
         const rootContainer = document.getElementById('root');
         if (rootContainer) {
             if (typeof ReactDOM.createRoot === 'function') {
